@@ -1,0 +1,16 @@
+
+doctrine:
+    dbal:
+        types:
+            hstore: Intaro\HStore\Doctrine\Types\HStoreType
+            mapping_types:
+                hstore: hstore
+
+    orm:
+        dql:
+            string_functions:
+                contains:         Intaro\HStore\Doctrine\Query\ContainsFunction
+                defined:          Intaro\HStore\Doctrine\Query\DefinedFunction
+                existsAny:        Intaro\HStore\Doctrine\Query\ExistsAnyFunction
+                fetchval:         Intaro\HStore\Doctrine\Query\FetchvalFunction
+                hstoreDifference: Intaro\HStore\Doctrine\Query\HstoreDifferenceFunction

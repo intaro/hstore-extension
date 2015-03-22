@@ -1,0 +1,39 @@
+language: php
+
+php:
+  - 5.4
+  - 5.5
+  - 5.6
+  - hhvm
+  - nightly
+  - hhvm-nightly
+
+allow_failures:
+    - php: nightly
+    - php: hhvm-nightly
+
+env:
+  - HSTORE_EXT=no
+  - HSTORE_EXT=yes
+
+before_script:
+  - if [ "$HSTORE_EXT" == "yes" ]; then sh -c "cd ext/hstore && phpize && ./configure --enable-hstore && make && sudo make install"; fi
+  - if [ "$HSTORE_EXT" == "yes" ]; then echo "extension=hstore.so" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`; fi
+
+after_success:
+  - "php tests/Benchmark.php"
+
+before_install:
+  - composer self-update
+
+install:
+  - composer --prefer-source install
+
+matrix:
+  exclude:
+    - php: hhvm
+      env: HSTORE_EXT=yes
+    - php: hhvm-nightly
+      env: HSTORE_EXT=yes
+    - php: nightly
+      env: HSTORE_EXT=yes

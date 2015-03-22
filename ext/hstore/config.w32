@@ -1,0 +1,8 @@
+// vim:ft=javascript
+
+ARG_ENABLE("hstore", "hStore support", "no");
+
+if (PHP_HSTORE != "no") {
+	AC_DEFINE('HAVE_HSTORE', 1);
+	EXTENSION('hstore', 'php_hstore.c');
+}
