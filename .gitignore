@@ -1,0 +1,10 @@
+composer.lock
+composer.phar
+vendor
+
+# Other
+.DS_Store
+*~
+/nbproject/*
+/*tags*
+.idea

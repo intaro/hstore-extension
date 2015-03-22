@@ -1,0 +1,33 @@
+{
+    "name": "intaro/hstore-extension",
+    "description": "The HStore Extension contains DBAL type hstore and registers Doctrine type hstore",
+    "keywords": ["doctrine", "postgresql", "hstore"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Intaro Soft",
+            "email": "mail@intaro.ru"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.0",
+        "doctrine/orm": "~2.0"
+    },
+    "suggest": {
+        "ext-hstore": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Intaro\\HStore\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Intaro\\HStore\\Tests\\": "tests/"
+        }
+    }
+}
