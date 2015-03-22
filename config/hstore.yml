@@ -3,8 +3,8 @@ doctrine:
     dbal:
         types:
             hstore: Intaro\HStore\Doctrine\Types\HStoreType
-            mapping_types:
-                hstore: hstore
+        mapping_types:
+            hstore: hstore
 
     orm:
         dql:
