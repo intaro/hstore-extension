@@ -4,7 +4,7 @@ namespace Intaro\HStore;
 
 final class Coder
 {
-    static function encode(array $arr)
+    public static function encode(array $arr)
     {
         static $escape = '"\\';
 
@@ -29,9 +29,12 @@ final class Coder
         return $result;
     }
 
-    static function decode($str)
+    public static function decode($str)
     {
         static $spaces = " \t\r\n";
+        static $sp_key = "= \t\r\n";
+        static $sp_val = ", \t\r\n";
+        static $regexp = '/" ((?>[^"\\\\]+|\\\\.)*) "/Asx';
 
         $len = strlen($str);
 
@@ -44,73 +47,77 @@ final class Coder
             return [];
         }
 
-        $p = 0;
+        $p = strspn($str, $spaces);
 
         $result = array();
-        $quoted = null;
+        $key    = null;
+        $value  = null;
+        $state  = 0;
 
         while ($p < $len) {
-            $p += strspn($str, $spaces, $p);
-            $c = $str[$p];
+            if (0 === $state) {
+                if ('"' === $str[$p]) {
+                    if (preg_match($regexp, $str, $m, 0, $p)) {
+                        $key = stripcslashes($m[1]);
+                        $p  += strlen($m[0]);
+                    } else {
+                        throw new \RuntimeException(sprintf("Syntax error at %p", $p));
+                    }
+                } else {
+                    $key = self::read($str, $sp_key, $p);
+                }
 
-            // Next element.
-            if (',' == $c) {
-                ++$p;
-                continue;
-            }
+                $state = 1;
+            } elseif (1 === $state) {
+                if ($p !== strpos($str, '=>', $p)) {
+                    throw new \RuntimeException(sprintf("Syntax error at %p", $p));
+                }
 
-            // Key.
-            $key = self::readString($str, $p, $quoted);
+                $p    += 2;
+                $state = 2;
+            } elseif (2 === $state) {
+                if ('"' === $str[$p]) {
+                    if (preg_match($regexp, $str, $m, 0, $p)) {
+                        $value = stripcslashes($m[1]);
+                        $p    += strlen($m[0]);
+                    } else {
+                        throw new \RuntimeException(sprintf("Syntax error at %p", $p));
+                    }
+                } else {
+                    $value = self::read($str, $sp_val, $p);
 
-            // '=>' sequence.
-            $p += strspn($str, $spaces, $p);
-            if ($p !== strpos($str, '=>', $p)) {
-                throw new \RuntimeException($str);
-            }
+                    if (4 === strlen($value) && 0 === stripos($value, 'NULL')) {
+                        $value = null;
+                    }
+                }
 
-            $p += 2;
-            $p += strspn($str, $spaces, $p);
-
-            // Value.
-            $value = self::readString($str, $p, $quoted);
-            if (!$quoted && 4 === strlen($value) && 0 === stripos($value, 'NULL')) {
-                $result[$key] = null;
-            } else {
                 $result[$key] = $value;
-            }
-        }
+                $state = 3;
+            } elseif (3 === $state) {
+                if (',' !== $str[$p]) {
+                    throw new \RuntimeException(sprintf("Syntax error at %p", $p));
+                }
 
-        if ($p != $len) {
-            throw new \RuntimeException($str);
+                ++$p;
+                $state = 0;
+            }
+
+            $p += strspn($str, $spaces, $p);
+        };
+
+        if ($state != 0 && $state != 3) {
+            throw new \RuntimeException("Unexpected end of string");
         }
 
         return $result;
     }
 
-    private static function readString($str, &$p, &$quoted)
+    private static function read($str, $spaces, &$p)
     {
-        $c = isset($str[$p]) ? $str[$p] : false;
+        $len   = strcspn($str, $spaces, $p);
+        $value = stripcslashes(substr($str, $p, $len));
+        $p    += $len;
 
-        // Unquoted string.
-        if ($c != '"') {
-            $quoted = false;
-            $len = strcspn($str, " \r\n\t,=>", $p);
-            $value = substr($str, $p, $len);
-            $p += $len;
-
-            return stripcslashes($value);
-        }
-
-        // Quoted string.
-        $quoted = true;
-        $m = null;
-        if (preg_match('/" ((?' . '>[^"\\\\]+|\\\\.)*) "/Asx', $str, $m, 0, $p)) {
-            $value = stripcslashes($m[1]);
-            $p += strlen($m[0]);
-
-            return $value;
-        }
-
-        throw new \RuntimeException($str);
+        return $value;
     }
 }
