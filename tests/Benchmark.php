@@ -33,7 +33,6 @@ Bench::addHStore(
 
 //----------------------------------------------------------------------------------------------------------------------
 
-Bench::calibrate();
 Bench::go();
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -42,21 +41,10 @@ use \Intaro\HStore\Coder;
 
 class Bench
 {
-    private static $iterations = 1000;
-    private static $net_time = 0;
+    private static $iterations = 50;
+    private static $repeats = 50;
 
-    private static $tests = [];
-
-    public static function calibrate()
-    {
-        $t = microtime(true);
-        for ($i = self::$iterations; $i >= 0; --$i) {
-            call_user_func_array('\Bench::noop', []);
-        }
-        $t = microtime(true) - $t;
-
-        self::$net_time = $t;
-    }
+    private static $tests   = [];
 
     public static function addArray($label, $value)
     {
@@ -76,36 +64,75 @@ class Bench
 
     public static function go()
     {
-        foreach (self::$tests as $label => $data) {
-            list($raw, $encoded) = $data;
-            $json = json_encode($raw);
+        $results = [];
 
-            echo "=== {$label} (encode)\n";
-            Bench::doBench("json", 'json_encode', [$raw]);
-            Bench::doBench("hstore", '\\Intaro\\HStore\\Coder::encode', [$raw]);
-            echo "\n";
+        for ($i = self::$repeats; $i >= 0; --$i) {
+            usleep(0);
 
-            echo "=== {$label} (decode)\n";
-            Bench::doBench("json", 'json_decode', [$json, true]);
-            Bench::doBench("hstore", '\\Intaro\\HStore\\Coder::decode', [$encoded]);
-            echo "\n";
+            foreach (self::$tests as $label => $data) {
+                list($raw, $encoded) = $data;
+                $json = json_encode($raw);
+
+                $results[$label]['encode']['json'][]   = Bench::doBench('json_encode', [$raw]);
+                $results[$label]['encode']['hstore'][] = Bench::doBench('\\Intaro\\HStore\\Coder::encode', [$raw]);
+
+                $results[$label]['decode']['json'][]   = Bench::doBench('json_decode', [$json, true]);
+                $results[$label]['decode']['hstore'][] = Bench::doBench('\\Intaro\\HStore\\Coder::decode', [$encoded]);
+            }
+        }
+
+        // print results
+        foreach ($results as $label => $ldata) {
+            foreach ($ldata as $group => $gdata) {
+                echo "=== {$label} ({$group})\n";
+
+                $functions_results = [];
+
+                foreach ($gdata as $function => $r) {
+                    $min = min($r);
+                    $max = max($r);
+                    $avg = array_sum($r) / count($r);
+
+                    $functions_results[$function] = $min;
+
+                    echo sprintf(
+                        "%8.3fμs min (%8.3fμs avg, %8.3fμs max) - %s\n",
+                        $min, $avg, $max,
+                        $function
+                    );
+                }
+                $json   = $functions_results['json'];
+                $hstore = $functions_results['hstore'];
+
+                echo "+++ ";
+                if ($json > $hstore) {
+                    echo sprintf("hstore %.2f%% faster that json", 100 * $json / $hstore);
+                } else {
+                    echo sprintf("json %.2f%% faster that hstore", 100 * $hstore / $json);
+                }
+
+                echo "\n";
+            }
         }
     }
 
-    public static function noop() {}
+    private static function doBench(callable $func, array $args)
+    {
+        gc_collect_cycles();
+        gc_disable();
+        usleep(0);
 
-    private static function doBench($label, callable $func, array $args) {
         $t = microtime(true);
         for ($i = self::$iterations; $i >= 0; --$i) {
             call_user_func_array($func, $args);
         }
         $t = microtime(true) - $t;
 
-        echo sprintf(
-            "%9.3f ms - %s\n",
-            1000 * ($t - self::$net_time),
-            $label
-        );
+        gc_enable();
+        gc_collect_cycles();
+        usleep(0);
+
+        return round($t * 1000000 / self::$iterations, 3);
     }
 }
 
