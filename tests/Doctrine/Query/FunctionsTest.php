@@ -1,9 +1,12 @@
 <?php
 
-namespace Intaro\HStore\Tests\Doctrine\Query;
+namespace Cent\HStore\Tests\Doctrine\Query;
 
-use Intaro\HStore\Tests\Doctrine\HStoreTestCase;
+use Cent\HStore\Tests\Doctrine\HStoreTestCase;
 
+/**
+ * Class FunctionsTest
+ */
 class FunctionsTest extends HStoreTestCase
 {
     public function testContains()

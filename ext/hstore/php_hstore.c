@@ -64,7 +64,7 @@ PHP_MINIT_FUNCTION( hstore )
 {
     zend_class_entry ce;
 
-    INIT_CLASS_ENTRY( ce, "Intaro\\HStore\\Coder", Coder_class_functions );
+    INIT_CLASS_ENTRY( ce, "Cent\\HStore\\Coder", Coder_class_functions );
     ce.create_object = NULL;
 
     Coder_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );

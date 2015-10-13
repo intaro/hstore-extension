@@ -1,6 +1,6 @@
 <?php
 
-namespace Intaro\HStore\Doctrine\Types;
+namespace Cent\HStore\Doctrine\Types;
 
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\ConversionException;
@@ -14,11 +14,24 @@ class HStoreType extends Type
 {
     const HSTORE = 'hstore';
 
+    /**
+     * @param array            $fieldDeclaration
+     * @param AbstractPlatform $platform
+     *
+     * @return string
+     */
     public function getSqlDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
         return self::HSTORE;
     }
 
+    /**
+     * @param mixed            $value
+     * @param AbstractPlatform $platform
+     *
+     * @return array|null
+     * @throws ConversionException
+     */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
         if (null === $value) {
@@ -32,6 +45,13 @@ class HStoreType extends Type
         }
     }
 
+    /**
+     * @param mixed            $value
+     * @param AbstractPlatform $platform
+     *
+     * @return null|string
+     * @throws ConversionException
+     */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
         if (null === $value) {
@@ -45,6 +65,9 @@ class HStoreType extends Type
         return Coder::encode($value);
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return self::HSTORE;

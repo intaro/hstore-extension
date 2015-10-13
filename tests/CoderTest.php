@@ -1,9 +1,14 @@
 <?php
 
-namespace Intaro\HStore\Tests;
+namespace Cent\HStore\Tests;
 
-use Intaro\HStore\Coder;
+use Cent\HStore\Coder;
 
+/**
+ * Class CoderTest
+ *
+ * @covers Cent\HStore\Coder
+ */
 class CoderTest extends \PHPUnit_Framework_TestCase
 {
     public function dataDecode()
@@ -146,9 +151,12 @@ class CoderTest extends \PHPUnit_Framework_TestCase
 
         $r = new \ReflectionExtension('hstore');
 
-        $this->assertContains('Intaro\\HStore\\Coder', $r->getClassNames());
+        $this->assertContains('Cent\\HStore\\Coder', $r->getClassNames());
     }
 
+    /**
+     * Test memory usage
+     */
     public function testMemoryUsage()
     {
         $var = [

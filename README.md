@@ -11,7 +11,7 @@ Installation
 To install this library, run the command below and you will get the latest version:
 
 ```sh
-composer require intaro/hstore-extension
+composer require cent/hstore-extension
 ```
 
 If you want to run the tests:
@@ -25,7 +25,7 @@ You can just include in you `config.yml`:
 
 ```yml
 imports:
-    - { resource: ../../vendor/intaro/hstore-extension/config/hstore.yml }
+    - { resource: ../../vendor/cent/hstore-extension/config/hstore.yml }
 ```
 
 PHP extension

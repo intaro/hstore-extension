@@ -1,6 +1,6 @@
 <?php
 
-namespace Intaro\HStore\Tests\Doctrine\Types;
+namespace Cent\HStore\Tests\Doctrine\Types;
 
 /**
  * @runInSeparateProcess true

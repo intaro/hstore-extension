@@ -1,5 +1,5 @@
 {
-    "name": "intaro/hstore-extension",
+    "name": "cent/hstore-extension",
     "description": "The HStore Extension contains DBAL type hstore and registers Doctrine type hstore",
     "keywords": ["doctrine", "postgresql", "hstore"],
     "type": "library",
@@ -8,6 +8,10 @@
         {
             "name": "Intaro Soft",
             "email": "mail@intaro.ru"
+        },
+        {
+            "name": "Cent.im team",
+            "email": "info@cent.im"
         }
     ],
     "require": {
@@ -22,12 +26,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Intaro\\HStore\\": "src/"
+            "Cent\\HStore\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Intaro\\HStore\\Tests\\": "tests/"
+            "Cent\\HStore\\Tests\\": "tests/"
         }
     }
 }
