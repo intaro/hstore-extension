@@ -38,7 +38,7 @@ Bench::go();
 
 //----------------------------------------------------------------------------------------------------------------------
 
-use \Intaro\HStore\Coder;
+use \Cent\HStore\Coder;
 
 class Bench
 {
@@ -82,12 +82,12 @@ class Bench
 
             echo "=== {$label} (encode)\n";
             Bench::doBench("json", 'json_encode', [$raw]);
-            Bench::doBench("hstore", '\\Intaro\\HStore\\Coder::encode', [$raw]);
+            Bench::doBench("hstore", '\\Cent\\HStore\\Coder::encode', [$raw]);
             echo "\n";
 
             echo "=== {$label} (decode)\n";
             Bench::doBench("json", 'json_decode', [$json, true]);
-            Bench::doBench("hstore", '\\Intaro\\HStore\\Coder::decode', [$encoded]);
+            Bench::doBench("hstore", '\\Cent\\HStore\\Coder::decode', [$encoded]);
             echo "\n";
         }
     }

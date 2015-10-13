@@ -2,15 +2,15 @@
 doctrine:
     dbal:
         types:
-            hstore: Intaro\HStore\Doctrine\Types\HStoreType
+            hstore: Cent\HStore\Doctrine\Types\HStoreType
         mapping_types:
             hstore: hstore
 
     orm:
         dql:
             string_functions:
-                contains:         Intaro\HStore\Doctrine\Query\ContainsFunction
-                defined:          Intaro\HStore\Doctrine\Query\DefinedFunction
-                existsAny:        Intaro\HStore\Doctrine\Query\ExistsAnyFunction
-                fetchval:         Intaro\HStore\Doctrine\Query\FetchvalFunction
-                hstoreDifference: Intaro\HStore\Doctrine\Query\HstoreDifferenceFunction
+                contains:         Cent\HStore\Doctrine\Query\ContainsFunction
+                defined:          Cent\HStore\Doctrine\Query\DefinedFunction
+                existsAny:        Cent\HStore\Doctrine\Query\ExistsAnyFunction
+                fetchval:         Cent\HStore\Doctrine\Query\FetchvalFunction
+                hstoreDifference: Cent\HStore\Doctrine\Query\HstoreDifferenceFunction

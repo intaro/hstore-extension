@@ -1,10 +1,19 @@
 <?php
 
-namespace Intaro\HStore;
+namespace Cent\HStore;
 
+/**
+ * Class Coder
+ */
 final class Coder
 {
-    static function encode(array $arr)
+    /**
+     * @param array $arr
+     *
+     * @return string
+     * @static
+     */
+    public static function encode(array $arr)
     {
         static $escape = '"\\';
 
@@ -21,6 +30,8 @@ final class Coder
 
             if (null === $value) {
                 $result .= '"' . addcslashes($key, $escape) . '"=>NULL';
+            } elseif (is_array($value)) {
+                $result .= '"' . addcslashes($key, $escape) . '"=>"' . self::encode($value);
             } else {
                 $result .= '"' . addcslashes($key, $escape) . '"=>"' . addcslashes($value, $escape) . '"';
             }
@@ -29,7 +40,14 @@ final class Coder
         return $result;
     }
 
-    static function decode($str)
+    /**
+     * @param string $str
+     *
+     * @return array
+     * @static
+     * @throws \RuntimeException
+     */
+    public static function decode($str)
     {
         static $spaces = " \t\r\n";
 
@@ -46,7 +64,7 @@ final class Coder
 
         $p = 0;
 
-        $result = array();
+        $result = [];
         $quoted = null;
 
         while ($p < $len) {
@@ -75,6 +93,8 @@ final class Coder
             $value = self::readString($str, $p, $quoted);
             if (!$quoted && 4 === strlen($value) && 0 === stripos($value, 'NULL')) {
                 $result[$key] = null;
+            } elseif (strpos($value, '=>')) {
+                $result[$key] = self::decode($value);
             } else {
                 $result[$key] = $value;
             }
@@ -87,6 +107,15 @@ final class Coder
         return $result;
     }
 
+    /**
+     * @param string  $str
+     * @param integer $p
+     * @param boolean $quoted
+     *
+     * @return string
+     * @static
+     * @throws \RuntimeException
+     */
     private static function readString($str, &$p, &$quoted)
     {
         $c = isset($str[$p]) ? $str[$p] : false;

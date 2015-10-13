@@ -1,22 +1,35 @@
 <?php
 
-namespace Intaro\HStore\Doctrine\Query;
+namespace Cent\HStore\Doctrine\Query;
 
 use Doctrine\ORM\Query\AST\Functions\FunctionNode;
 use Doctrine\ORM\Query\Lexer;
+use Doctrine\ORM\Query\Parser;
+use Doctrine\ORM\Query\SqlWalker;
 
+/**
+ * Class HstoreDifferenceFunction
+ */
 class HstoreDifferenceFunction extends FunctionNode
 {
     public $hstoreExpression = null;
     public $keyExpression = null;
 
-    public function getSql(\Doctrine\ORM\Query\SqlWalker $sqlWalker)
+    /**
+     * @param SqlWalker $sqlWalker
+     *
+     * @return string
+     */
+    public function getSql(SqlWalker $sqlWalker)
     {
         return  $this->hstoreExpression->dispatch($sqlWalker) . ' - ARRAY[' .
-            $this->keyExpression->dispatch($sqlWalker) . ']';
+        $this->keyExpression->dispatch($sqlWalker) . ']';
     }
 
-    public function parse(\Doctrine\ORM\Query\Parser $parser)
+    /**
+     * @param Parser $parser
+     */
+    public function parse(Parser $parser)
     {
         $parser->match(Lexer::T_IDENTIFIER);
         $parser->match(Lexer::T_OPEN_PARENTHESIS);
