@@ -1,23 +1,26 @@
 language: php
 
+sudo: false
+
+cache:
+    directories:
+        - vendor
+        - $HOME/.composer/cache
+
 php:
   - 5.4
   - 5.5
   - 5.6
+  - 7.0
   - hhvm
-  - nightly
-  - hhvm-nightly
-
-allow_failures:
-    - php: nightly
-    - php: hhvm-nightly
 
 env:
   - HSTORE_EXT=no
   - HSTORE_EXT=yes
 
 before_script:
-  - if [ "$HSTORE_EXT" == "yes" ]; then sh -c "cd ext/hstore && phpize && ./configure --enable-hstore && make && sudo make install"; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:1} != "7" && "$HSTORE_EXT" == "yes" ]]; then sh -c "cd ext/hstore5x && phpize && ./configure --enable-hstore && make && make install"; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:1} == "7" && "$HSTORE_EXT" == "yes" ]]; then sh -c "cd ext/hstore7x && phpize && ./configure --enable-hstore && make && make install"; fi
   - if [ "$HSTORE_EXT" == "yes" ]; then echo "extension=hstore.so" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`; fi
 
 after_success:
@@ -30,10 +33,7 @@ install:
   - composer --prefer-source install
 
 matrix:
+  fast_finish: true
   exclude:
     - php: hhvm
-      env: HSTORE_EXT=yes
-    - php: hhvm-nightly
-      env: HSTORE_EXT=yes
-    - php: nightly
       env: HSTORE_EXT=yes
