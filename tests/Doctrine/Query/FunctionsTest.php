@@ -13,7 +13,7 @@ class FunctionsTest extends HStoreTestCase
             ->createQuery("SELECT contains(o.attrs, 'a') from E:Order o");
 
         $this->assertEquals(
-            "SELECT contains(o0_.attrs, 'a') AS sclr0 FROM Order o0_",
+            "SELECT contains(o0_.attrs, 'a') AS sclr_0 FROM Order o0_",
             $q->getSql()
         );
     }
@@ -25,7 +25,7 @@ class FunctionsTest extends HStoreTestCase
             ->createQuery("SELECT defined(o.attrs, 'a') from E:Order o");
 
         $this->assertEquals(
-            "SELECT defined(o0_.attrs, 'a') AS sclr0 FROM Order o0_",
+            "SELECT defined(o0_.attrs, 'a') AS sclr_0 FROM Order o0_",
             $q->getSql()
         );
     }
@@ -37,7 +37,7 @@ class FunctionsTest extends HStoreTestCase
             ->createQuery("SELECT existsAny(o.attrs, 'a') from E:Order o");
 
         $this->assertEquals(
-            "SELECT exists_any(o0_.attrs, ARRAY['a']) AS sclr0 FROM Order o0_",
+            "SELECT exists_any(o0_.attrs, ARRAY['a']) AS sclr_0 FROM Order o0_",
             $q->getSql()
         );
     }
@@ -49,7 +49,7 @@ class FunctionsTest extends HStoreTestCase
             ->createQuery("SELECT fetchval(o.attrs, 'a') from E:Order o");
 
         $this->assertEquals(
-            "SELECT fetchval(o0_.attrs, 'a') AS sclr0 FROM Order o0_",
+            "SELECT fetchval(o0_.attrs, 'a') AS sclr_0 FROM Order o0_",
             $q->getSql()
         );
     }
@@ -61,7 +61,7 @@ class FunctionsTest extends HStoreTestCase
             ->createQuery("SELECT hstoreDifference(o.attrs, 'a') from E:Order o");
 
         $this->assertEquals(
-            "SELECT o0_.attrs - ARRAY['a'] AS sclr0 FROM Order o0_",
+            "SELECT o0_.attrs - ARRAY['a'] AS sclr_0 FROM Order o0_",
             $q->getSql()
         );
     }
