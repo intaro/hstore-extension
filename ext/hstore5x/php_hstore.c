@@ -114,116 +114,138 @@ typedef struct
     char *begin;
     int begin_len;
 
-    char *key;
-    int key_len;
-
     char *ptr;
     char *ptr_max;
 
     char *word;
     int word_len;
-    smart_str *buf;
 
     zval *z;
     int error;
 } HSParser;
 
-static inline zend_bool hstore_parse_value(HSParser *state, zend_bool ignoreeq, zend_bool *escaped)
+static inline zend_bool hstore_parse_value(HSParser *state, smart_str *buf, zend_bool ignoreeq, zend_bool *escaped)
 {
-    #define GV_WAIT_VAL    0
     #define GV_IN_VAL      1
     #define GV_IN_ESC_VAL  2
     #define GV_WAIT_ESC_IN 3
 
-    int st = GV_WAIT_VAL;
+    int st;
+
     char * value_start = state->ptr;
 
-    *escaped   = 0;
-    state->buf->len = 0;
+    *escaped = 0;
+    buf->len = 0;
 
     zend_bool use_buffer  = 0;
     zend_bool last_symbol = 1;
 
-    while (1) {
-        char ch = *(state->ptr);
+    register char ch = *(state->ptr);
 
-        if (st == GV_WAIT_VAL) {
-            if ('"' == ch) {
-                *escaped = 1;
-                ++value_start;
-                st = GV_IN_ESC_VAL;
-            } else if ('=' == ch && !ignoreeq) {
-                state->error = ERROR_SYNTAX;
-                return 0;
-            } else if ('\\' == ch) {
-                st = GV_WAIT_ESC_IN;
-            } else if (!isspace((unsigned char) ch)) {
-                st = GV_IN_VAL;
-            } else {
-                ++value_start;
-            }
-        } else if (st == GV_IN_VAL) {
-            if ('\\' == ch) {
-                st = GV_WAIT_ESC_IN;
-            } else if ('=' == ch && !ignoreeq) {
-                --state->ptr;
-                break;
-            } else if (',' == ch && ignoreeq) {
-                --state->ptr;
-                break;
-            } else if (isspace((unsigned char) ch)) {
-                last_symbol = 0;
-                break;
-            } else if (use_buffer) {
-                smart_str_appendc(state->buf, ch);
-            }
-        } else if (st == GV_IN_ESC_VAL) {
-            if ('\\' == ch) {
-                st = GV_WAIT_ESC_IN;
-            } else if ('"' == ch) {
-                last_symbol = 0;
-                break;
-            } else if (use_buffer) {
-                smart_str_appendc(state->buf, ch);
-            }
-        } else if (st == GV_WAIT_ESC_IN) {
-            if (!use_buffer) {
-                use_buffer = 1;
-                int nlen = state->ptr - value_start - 1;
-                if (nlen > 0) {
-                    smart_str_appendl(state->buf, value_start, nlen);
-                }
-            }
+    // we already skip leading spaces in hstore_parse
+    if ('"' == ch) {
+        *escaped = 1;
+        ++value_start;
+        st = GV_IN_ESC_VAL;
 
-            smart_str_appendc(state->buf, ch);
+        while (1) {
+            ++state->ptr;
 
-            if (*escaped) {
-                st = GV_IN_ESC_VAL;
-            } else {
-                st = GV_IN_VAL;
-            }
-        } else {
-            state->error = ERROR_UNKNOWN_STATE;
-            return 0;
-        }
-
-        ++state->ptr;
-
-        if (state->ptr >= state->ptr_max) {
-            if (st != GV_IN_VAL) {
+            if (state->ptr >= state->ptr_max) {
                 state->error = ERROR_UNEXPECTED_END;
                 return 0;
             }
 
-            last_symbol = 0;
-            break;
+            char ch = *(state->ptr);
+
+            if (st == GV_IN_ESC_VAL) {
+                if ('\\' == ch) {
+                    st = GV_WAIT_ESC_IN;
+                } else if ('"' == ch) {
+                    last_symbol = 0;
+                    break;
+                } else if (use_buffer) {
+                    smart_str_appendc(buf, ch);
+                }
+            } else if (st == GV_WAIT_ESC_IN) {
+                if (!use_buffer) {
+                    use_buffer = 1;
+                    int nlen = state->ptr - value_start - 1;
+                    if (nlen > 0) {
+                        smart_str_appendl(buf, value_start, nlen);
+                    }
+                }
+
+                smart_str_appendc(buf, ch);
+
+                st = GV_IN_ESC_VAL;
+            } else {
+                state->error = ERROR_UNKNOWN_STATE;
+                return 0;
+            }
+        }
+    } else {
+        if ('=' == ch && !ignoreeq) {
+            state->error = ERROR_SYNTAX;
+            return 0;
+        } else if ('\\' == ch) {
+            st = GV_WAIT_ESC_IN;
+            ++state->ptr;
+        }
+
+        st == GV_IN_VAL;
+
+        for (;; ++state->ptr) {
+            if (state->ptr >= state->ptr_max) {
+                if (st != GV_IN_VAL) {
+                    state->error = ERROR_UNEXPECTED_END;
+                    return 0;
+                }
+
+                last_symbol = 0;
+                break;
+            }
+
+            ch = *(state->ptr);
+
+            if (st == GV_IN_VAL) {
+                if ('\\' == ch) {
+                    st = GV_WAIT_ESC_IN;
+                } else if ('=' == ch && !ignoreeq) {
+                    --state->ptr;
+                    break;
+                } else if (',' == ch && ignoreeq) {
+                    --state->ptr;
+                    break;
+                } else if (isspace((unsigned char) ch)) {
+                    last_symbol = 0;
+                    break;
+                } else if (use_buffer) {
+                    smart_str_appendc(buf, ch);
+                }
+            } else if (st == GV_WAIT_ESC_IN) {
+                if (!use_buffer) {
+                    use_buffer = 1;
+                    int nlen = state->ptr - value_start - 1;
+                    if (nlen > 0) {
+                        smart_str_appendl(buf, value_start, nlen);
+                    }
+                }
+
+                smart_str_appendc(buf, ch);
+
+                st = GV_IN_VAL;
+            } else {
+                state->error = ERROR_UNKNOWN_STATE;
+                return 0;
+            }
         }
     }
 
     // return parsed value
     if (use_buffer) {
-        state->word     = state->buf->c;
-        state->word_len = state->buf->len;
+        state->word     = buf->c;
+        state->word_len = buf->len;
     } else {
         state->word     = value_start;
         state->word_len = state->ptr - value_start + last_symbol;
@@ -253,27 +275,37 @@ static inline void hstore_parse(HSParser *state) /* {{{ */
     int st = WKEY;
     zend_bool escaped;
 
+    // for smart_str_alloc macro
+    size_t newlen;
+    smart_str key_buf = {0};
+    smart_str_alloc(&key_buf, 128, 0);
+    smart_str val_buf = {0};
+    smart_str_alloc(&val_buf, 2048, 0);
+
     while (state->ptr < state->ptr_max) {
         char ch = *(state->ptr);
 
         if (isspace((unsigned char) ch)) {
-            state->ptr++;
+            ++state->ptr;
             continue;
         }
 
         if (st == WKEY) {
-            if (!hstore_parse_value(state, 0, &escaped)) {
-                return;
+            if (!hstore_parse_value(state, &key_buf, 0, &escaped)) {
+                goto free;
             }
 
-            state->key     = state->word;
-            state->key_len = state->word_len;
+            // word need be copied
+            if (!key_buf.len) {
+                smart_str_appendl(&key_buf, state->word, state->word_len);
+            }
+            smart_str_appendc(&key_buf, '\0');
 
             st = WEQ;
         } else if (st == WEQ) {
             if (state->ptr + 2 > state->ptr_max) {
                 state->error = ERROR_UNEXPECTED_END;
-                return;
+                goto free;
             }
 
             if ('=' == *(state->ptr) && '>' == *(state->ptr + 1)) {
@@ -286,32 +318,27 @@ static inline void hstore_parse(HSParser *state) /* {{{ */
             state->error = ERROR_SYNTAX;
             return;
         } else if (st == WVAL) {
-            char *key = estrndup(state->key, state->key_len);
-
-            if (!hstore_parse_value(state, 1, &escaped)) {
-                efree(key);
-                return;
+            if (!hstore_parse_value(state, &val_buf, 1, &escaped)) {
+                goto free;
             }
 
             if (!escaped && 4 == state->word_len && isnull_keyword(state->word)) {
-                add_assoc_null_ex(state->z, key, state->key_len + 1);
+                add_assoc_null_ex(state->z, key_buf.c, key_buf.len);
             } else {
-                add_assoc_stringl_ex(state->z, key, state->key_len + 1, state->word, state->word_len, 1);
+                add_assoc_stringl_ex(state->z, key_buf.c, key_buf.len, state->word, state->word_len, 1);
             }
-
-            efree(key);
 
             st = WDEL;
         } else if (st == WDEL) {
-            if (',' == *(state->ptr)) {
+            if (',' == ch) {
                 st = WKEY;
             } else {
                 state->error = ERROR_SYNTAX;
-                return;
+                goto free;
             }
         } else {
             state->error = ERROR_UNKNOWN_STATE;
-            return;
+            goto free;
         }
 
         state->ptr++;
@@ -320,6 +347,10 @@ static inline void hstore_parse(HSParser *state) /* {{{ */
     if (st != WKEY && st != WDEL) {
         state->error = ERROR_UNEXPECTED_END;
     }
+
+free:
+    smart_str_free(&key_buf);
+    smart_str_free(&val_buf);
 }
 
 /* {{{ proto mixed hstore_decode(string hstore)
@@ -333,24 +364,14 @@ static PHP_FUNCTION(hstore_decode)
         return;
     }
 
-    smart_str buf = {0};
-
     HSParser state;
     state.begin = str;
     state.begin_len = str_len;
-    state.buf = &buf;
 
     ALLOC_INIT_ZVAL(state.z);
-
     array_init(state.z);
 
-    // for smart_str_alloc macro
-    size_t newlen;
-    smart_str_alloc(state.buf, 1024, 0);
-
     hstore_parse(&state);
-
-    smart_str_free(&buf);
 
     if (0 == state.error) {
         *return_value = *state.z;
@@ -364,26 +385,37 @@ static PHP_FUNCTION(hstore_decode)
         zend_throw_exception(NULL, "Internal error", 0 TSRMLS_CC);
     }
     FREE_ZVAL(state.z);
-
-    //    elog(ERROR, "Syntax error near '%c' at position %d", *(state->ptr), (int32) (state->ptr - state->begin));
-    // elog(ERROR, "Unknown state %d at line %d in file '%s'", st, __LINE__, __FILE__);
 }
 /* }}} */
 
-static inline void escape_string(smart_str *buf, char *str, int str_len) /* {{{ */
+static zend_always_inline void escape_string(smart_str *buf, char *str, int str_len) /* {{{ */
 {
+    if (!str_len) {
+        return;
+    }
+
+    // preallocate
+    size_t newlen; smart_str_alloc(buf, str_len, 0);
+
     char *ptr = str;
     char *ptr_max = str + str_len;
 
-    while (ptr < ptr_max) {
-        char ch = *ptr;
+    char *start = ptr;
+    char ch = *ptr;
 
+    for (; ptr < ptr_max; ptr++, ch = *ptr) {
         if ('"' == ch || '\\' == ch) {
+            if (ptr > start) {
+                smart_str_appendl(buf, start, ptr - start);
+            }
+            start = ptr;
+
             smart_str_appendc(buf, '\\');
         }
-        smart_str_appendc(buf, ch);
+    }
 
-        ptr++;
+    if (ptr > start) {
+        smart_str_appendl(buf, start, ptr - start);
     }
 }
 
@@ -401,7 +433,7 @@ static PHP_FUNCTION(hstore_encode)
 
     // for smart_str_alloc macro
     size_t newlen;
-    smart_str_alloc(&buf, 1024, 0);
+    smart_str_alloc(&buf, 2048, 0);
 
     HashTable *myht = HASH_OF(arr);
     HashPosition pos;
@@ -426,8 +458,7 @@ static PHP_FUNCTION(hstore_encode)
             }
 
             if (need_comma) {
-                smart_str_appendc(&buf, ',');
-                smart_str_appendc(&buf, ' ');
+                smart_str_appendl(&buf, ", ", 2);
             } else {
                 need_comma = 1;
             }
@@ -440,9 +471,7 @@ static PHP_FUNCTION(hstore_encode)
                 smart_str_append_long(&buf, (long) index);
             }
 
-            smart_str_appendc(&buf, '"');
-            smart_str_appendc(&buf, '=');
-            smart_str_appendc(&buf, '>');
+            smart_str_appendl(&buf, "\"=>", 3);
 
             if (Z_TYPE_PP(data) == IS_NULL) {
                 smart_str_appendl(&buf, "NULL", 4);

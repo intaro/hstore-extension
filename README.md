@@ -1,6 +1,8 @@
 HStore Extension
 ==================
 
+[![Build Status](https://travis-ci.org/intaro/hstore-extension.svg?branch=master)](https://travis-ci.org/intaro/hstore-extension)
+
 PostgreSQL module `hstore` allows to store sets of key/value pairs within a single PostgreSQL value. More about it [here](http://www.postgresql.org/docs/current/static/hstore.html).
 
 The HStore Extension contains DBAL type `hstore` and registers Doctrine type `hstore`.
@@ -31,12 +33,12 @@ imports:
 PHP extension
 -------------
 
-To speed up encoding/decoding of strings you can install C extension shipped in ext/hstore directory.
+To speed up encoding/decoding of strings you can install C extension shipped in `ext` directory.
+Use appropriate folder for you php version `hstore5x` for `5.x` and `hstore7x` for `7.x`.
+
 To compile extension you must install php-dev package.
 
-The extension compiling:
 ```bash
-cd ext/hstore
 phpize
 ./configure
 make

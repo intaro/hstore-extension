@@ -79,8 +79,6 @@ class CoderTest extends \PHPUnit_Framework_TestCase
             ['""=>"\\""', ['' => '"']],
             ['\"a=>q"w',   ['"a' => 'q"w']],
 
-            // TODO
-            /*
             ['>,=>q=w,',   ['>,' => 'q=w']],
             ['>, =>q=w,',   ['>,' => 'q=w']],
             ['>, =>q=w ,',   ['>,' => 'q=w']],
@@ -88,10 +86,9 @@ class CoderTest extends \PHPUnit_Framework_TestCase
             ['>,=>q=w , ',   ['>,' => 'q=w']],
             ['>,=>q=w, ',   ['>,' => 'q=w']],
 
-            ['\=a=>q=w',   ['=a' => 'q=w']],
+            //['\=a=>q=w',   ['=a' => 'q=w']],
             ['"=a"=>q\=w', ['=a' => 'q=w']],
             ['"\"a"=>q>w', ['"a' => 'q>w']],
-            */
         ];
     }
 
