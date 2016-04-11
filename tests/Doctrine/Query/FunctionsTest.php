@@ -6,6 +6,30 @@ use Intaro\HStore\Tests\Doctrine\HStoreTestCase;
 
 class FunctionsTest extends HStoreTestCase
 {
+    public function testAKeys()
+    {
+        $q = $this
+            ->entityManager
+            ->createQuery("SELECT akeys(o.attrs) from E:Order o");
+
+        $this->assertEquals(
+            "SELECT akeys(o0_.attrs) AS sclr_0 FROM Order o0_",
+            $q->getSql()
+        );
+    }
+
+    public function testAVals()
+    {
+        $q = $this
+            ->entityManager
+            ->createQuery("SELECT avals(o.attrs) from E:Order o");
+
+        $this->assertEquals(
+            "SELECT avals(o0_.attrs) AS sclr_0 FROM Order o0_",
+            $q->getSql()
+        );
+    }
+
     public function testContains()
     {
         $q = $this
@@ -13,7 +37,7 @@ class FunctionsTest extends HStoreTestCase
             ->createQuery("SELECT contains(o.attrs, 'a') from E:Order o");
 
         $this->assertEquals(
-            "SELECT contains(o0_.attrs, 'a') AS sclr_0 FROM Order o0_",
+            "SELECT (o0_.attrs @> 'a') AS sclr_0 FROM Order o0_",
             $q->getSql()
         );
     }
