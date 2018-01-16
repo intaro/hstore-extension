@@ -22,6 +22,8 @@ class HStoreTestCase extends \PHPUnit_Framework_TestCase
         $config->addEntityNamespace('E', 'Intaro\HStore\Tests\Doctrine\Entities');
 
         $config->setCustomStringFunctions(array(
+            'akeys'            => 'Intaro\HStore\Doctrine\Query\AKeysFunction',
+            'avals'            => 'Intaro\HStore\Doctrine\Query\AValsFunction',
             'contains'         => 'Intaro\HStore\Doctrine\Query\ContainsFunction',
             'defined'          => 'Intaro\HStore\Doctrine\Query\DefinedFunction',
             'existsAny'        => 'Intaro\HStore\Doctrine\Query\ExistsAnyFunction',
