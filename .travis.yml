@@ -12,6 +12,8 @@ php:
   - 5.5
   - 5.6
   - 7.0
+  - 7.1
+  - 7.2
   - hhvm
 
 env:
@@ -27,7 +29,8 @@ after_success:
   - "php tests/Benchmark.php"
 
 before_install:
-  - composer self-update
+  # turn off XDebug
+  - phpenv config-rm xdebug.ini || return 0
 
 install:
   - composer --prefer-source install
