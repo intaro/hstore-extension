@@ -37,3 +37,5 @@ matrix:
   exclude:
     - php: hhvm
       env: HSTORE_EXT=yes
+  allow_failures:
+    - php: hhvm
