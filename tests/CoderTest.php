@@ -148,6 +148,8 @@ class CoderTest extends \PHPUnit_Framework_TestCase
 
     public function testMemoryUsage()
     {
+        gc_collect_cycles();
+
         $var = [
             'a' => 'b',
             'c' => null,
@@ -163,6 +165,7 @@ class CoderTest extends \PHPUnit_Framework_TestCase
 
         $before = memory_get_usage();
         $real_before = memory_get_usage(true);
+
 
         for ($i = 0; $i < 10000; $i++) {
             Coder::decode(Coder::encode($var));
