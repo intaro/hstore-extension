@@ -25,10 +25,19 @@ class HStoreType extends Type
             return null;
         }
 
-        try {
-            return Coder::decode($value);
-        } catch (\Exception $e) {
-            throw ConversionException::conversionFailed($value, $this->getName());
+        if (\function_exists('hstore_decode')) {
+            $return = \hstore_decode($value);
+            if (false === $return) {
+                throw ConversionException::conversionFailed($value, $this->getName());
+            }
+
+            return $return;
+        } else {
+            try {
+                return Coder::decode($value);
+            } catch (\Exception $e) {
+                throw ConversionException::conversionFailed($value, $this->getName());
+            }
         }
     }
 
@@ -40,6 +49,15 @@ class HStoreType extends Type
 
         if (!is_array($value)) {
             throw ConversionException::conversionFailed($value, $this->getName());
+        }
+
+        if (\function_exists('hstore_encode')) {
+            $return = \hstore_encode($value);
+            if (false === $return) {
+                throw ConversionException::conversionFailed($value, $this->getName());
+            }
+
+            return $return;
         }
 
         return Coder::encode($value);
