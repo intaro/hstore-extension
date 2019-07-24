@@ -138,7 +138,7 @@ class CoderTest extends \PHPUnit_Framework_TestCase
     public function testExtension()
     {
         if (!extension_loaded('hstore')) {
-            return;
+            $this->markTestSkipped();
         }
 
         $r = new \ReflectionExtension('hstore');
@@ -157,21 +157,23 @@ class CoderTest extends \PHPUnit_Framework_TestCase
             'f' => str_repeat('0', 1024),
         ];
 
-        // allocate zval's
-        $before = 0;
-        $after  = 0;
-        $real_before = 0;
-        $real_after  = 0;
+        set_error_handler(function () {
+            // noop
+        });
 
-        $before = memory_get_usage();
-        $real_before = memory_get_usage(true);
+        try {
+            $i = 0;
 
+            $before = memory_get_usage();
+            $real_before = memory_get_usage(true);
 
-        for ($i = 0; $i < 10000; $i++) {
-            Coder::decode(Coder::encode($var));
+            for (; $i < 10000; $i++) {
+                Coder::decode(Coder::encode($var));
+            }
+        } finally {
+            restore_error_handler();
         }
 
-        unset($i);
         gc_collect_cycles();
 
         $after = memory_get_usage();
