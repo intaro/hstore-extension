@@ -2,8 +2,9 @@
 doctrine:
     dbal:
         types:
-            hstore: Intaro\HStore\Doctrine\Types\HStoreType
-            commented: false
+            hstore:
+                class: Intaro\HStore\Doctrine\Types\HStoreType
+                commented: false
         mapping_types:
             hstore: hstore
 
