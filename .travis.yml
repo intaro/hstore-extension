@@ -13,6 +13,9 @@ php:
   - 7.1
   - 7.2
   - 7.3
+  - 7.4
+  - 8.0
+  - 8.1
   - hhvm
 
 env:
@@ -20,8 +23,9 @@ env:
   - HSTORE_EXT=yes
 
 before_script:
-  - if [[ ${TRAVIS_PHP_VERSION:0:1} != "7" && "$HSTORE_EXT" == "yes" ]]; then sh -c "cd ext/hstore5x && phpize && ./configure --enable-hstore && make && make install"; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:1} == "5" && "$HSTORE_EXT" == "yes" ]]; then sh -c "cd ext/hstore5x && phpize && ./configure --enable-hstore && make && make install"; fi
   - if [[ ${TRAVIS_PHP_VERSION:0:1} == "7" && "$HSTORE_EXT" == "yes" ]]; then sh -c "cd ext/hstore7x && phpize && ./configure --enable-hstore && make && make install"; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:1} == "8" && "$HSTORE_EXT" == "yes" ]]; then sh -c "cd ext/hstore8x && phpize && ./configure --enable-hstore && make && make install"; fi
   - if [ "$HSTORE_EXT" == "yes" ]; then echo "extension=hstore.so" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`; fi
 
 after_success:

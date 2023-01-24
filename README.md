@@ -34,7 +34,7 @@ PHP extension
 -------------
 
 To speed up encoding/decoding of strings you can install C extension shipped in `ext` directory.
-Use appropriate folder for you php version `hstore5x` for `5.x` and `hstore7x` for `7.x`.
+Use appropriate folder for you php version `hstore5x` for `5.x`, `hstore7x` for `7.x` and `hstore8x` for `8.x`.
 
 To compile extension you must install php-dev package.
 
