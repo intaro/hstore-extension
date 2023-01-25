@@ -1,0 +1,58 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build-ext:
+    name: "PHPUnit (PHP ${{ matrix.version.php }}, hstore-ext: ${{ matrix.hstore_ext }})"
+    runs-on: ubuntu-latest
+    strategy:
+#      fail-fast: true
+      matrix:
+        version:
+          - { php: 5.6, composer: 1, phpunit: 5 }
+          - { php: 7.1, composer: 1, phpunit: 7 }
+          - { php: 7.2, composer: 2.x, phpunit: 8 }
+          - { php: 7.3, composer: 2.x, phpunit: 8 }
+          - { php: 7.4, composer: 2.x, phpunit: 8 }
+        hstore_ext:
+          - no
+          - yes
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: PHP ${{ matrix.version.php }} install 
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.version.php }}
+
+      - name: Composer validate
+        uses: php-actions/composer@v6
+        with:
+          version: ${{ matrix.version.composer }}
+          php_version: ${{ matrix.version.php }}
+          command: validate
+
+      - name: Composer install
+        uses: php-actions/composer@v6
+        with:
+          version: ${{ matrix.version.composer }}
+          php_version: ${{ matrix.version.php }}
+          args: --prefer-source
+
+      - name: Build extension
+        run: "cd ext/hstore${PHP_VERSION%.*}x && phpize && ./configure --enable-hstore && make && sudo make install"
+        if: matrix.hstore_ext == 'yes'
+        env:
+          PHP_VERSION: ${{ matrix.version.php }}
+
+      - name: PHPUnit Tests
+        uses: php-actions/phpunit@master
+        with:
+          php_version: ${{ matrix.version.php }}
+          version: ${{ matrix.version.phpunit }}
+
+      - name: Benchmark
+        run: php tests/Benchmark.php
