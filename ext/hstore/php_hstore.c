@@ -67,12 +67,11 @@ PHP_MINIT_FUNCTION( hstore )
     INIT_CLASS_ENTRY( ce, "Intaro\\HStore\\Coder", Coder_class_functions );
     ce.create_object = NULL;
 
-    Coder_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );
+    Coder_ce_ptr = zend_register_internal_class( &ce );
 
     if( !Coder_ce_ptr ) {
         zend_error( E_ERROR,
             "HStore: Failed to register Coder class.");
-        return;
     }
 }
 
@@ -352,7 +351,7 @@ static PHP_FUNCTION(hstore_decode)
     char *str;
     size_t str_len;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
         return;
     }
 
@@ -367,13 +366,13 @@ static PHP_FUNCTION(hstore_decode)
     if (0 == state.error) {
         //
     } else if (ERROR_UNKNOWN_STATE == state.error) {
-        zend_throw_exception(NULL, "Unknown state", 0 TSRMLS_CC);
+        zend_throw_exception(NULL, "Unknown state", 0);
     } else if (ERROR_UNEXPECTED_END == state.error) {
-        zend_throw_exception(NULL, "Unexpected end of string", 0 TSRMLS_CC);
+        zend_throw_exception(NULL, "Unexpected end of string", 0);
     } else if (ERROR_SYNTAX == state.error) {
-        zend_throw_exception(NULL, "Syntax error", 0 TSRMLS_CC);
+        zend_throw_exception(NULL, "Syntax error", 0);
     } else {
-        zend_throw_exception(NULL, "Internal error", 0 TSRMLS_CC);
+        zend_throw_exception(NULL, "Internal error", 0);
     }
 }
 /* }}} */
@@ -419,7 +418,7 @@ static PHP_FUNCTION(hstore_encode)
 	zend_ulong num_idx;
     zend_string *str_idx;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &array) == FAILURE) {
         return;
     }
 

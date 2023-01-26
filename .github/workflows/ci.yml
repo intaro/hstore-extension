@@ -42,16 +42,23 @@ jobs:
           args: --prefer-source
 
       - name: Build extension
-        run: "cd ext/hstore${PHP_VERSION%.*}x && phpize && ./configure --enable-hstore && make && sudo make install"
+        run: "cd ext/hstore && phpize && ./configure --enable-hstore && make && sudo make install"
         if: matrix.hstore_ext == 'yes'
         env:
           PHP_VERSION: ${{ matrix.version.php }}
 
-      - name: PHPUnit Tests
-        uses: php-actions/phpunit@master
-        with:
-          php_version: ${{ matrix.version.php }}
-          version: ${{ matrix.version.phpunit }}
+      - name: enable hstore ext
+        if: matrix.hstore_ext == 'yes'
+        run: echo 'extension = hstore.so' | sudo tee -a "$(php -i | grep 'additional .ini files' | awk '{print $9}')"/99-hstore.ini
+
+      - name: php -m
+        run: php -m
+
+      - name: php -i
+        run: php -i | grep ini
+
+      - name: PHPUnit
+        run: ./vendor/bin/phpunit
 
       - name: Benchmark
         run: php tests/Benchmark.php
