@@ -3,8 +3,9 @@
 namespace Intaro\HStore\Tests;
 
 use Intaro\HStore\Coder;
+use PHPUnit\Framework\TestCase;
 
-class CoderTest extends \PHPUnit_Framework_TestCase
+class CoderTest extends TestCase
 {
     public function dataDecode()
     {
@@ -98,7 +99,7 @@ class CoderTest extends \PHPUnit_Framework_TestCase
      * @param string $data
      * @param array  $expected
      */
-    public function testDecode($data, array $expected)
+    public function testDecode($data, array $expected): void
     {
         $this->assertSame($expected, Coder::decode($data));
     }
@@ -130,12 +131,12 @@ class CoderTest extends \PHPUnit_Framework_TestCase
      * @param array  $data
      * @param string $expected
      */
-    public function testEncode(array $data, $expected)
+    public function testEncode(array $data, $expected): void
     {
         $this->assertSame($expected, Coder::encode($data));
     }
 
-    public function testExtension()
+    public function testExtension(): void
     {
         if (!extension_loaded('hstore')) {
             $this->markTestSkipped();
@@ -146,7 +147,7 @@ class CoderTest extends \PHPUnit_Framework_TestCase
         $this->assertContains('Intaro\\HStore\\Coder', $r->getClassNames());
     }
 
-    public function testMemoryUsage()
+    public function testMemoryUsage(): void
     {
         gc_collect_cycles();
 
@@ -178,13 +179,7 @@ class CoderTest extends \PHPUnit_Framework_TestCase
 
         $after = memory_get_usage();
         $real_after = memory_get_usage(true);
-
-        if ($after > $before) {
-            $this->fail(sprintf("Memory is corrupted (%d bytes not cleared)", $after - $before));
-        }
-
-        if ($real_after > $real_before) {
-            $this->fail(sprintf("Real memory is corrupted (%d bytes not cleared)", $real_after - $real_before));
-        }
+        $this->assertLessThanOrEqual($before, $after, sprintf("Memory is corrupted (%d bytes not cleared)", $after - $before));
+        $this->assertLessThanOrEqual($real_before, $real_after, sprintf("Real memory is corrupted (%d bytes not cleared)", $real_after - $real_before));
     }
 }

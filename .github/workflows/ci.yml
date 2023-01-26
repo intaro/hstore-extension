@@ -10,11 +10,10 @@ jobs:
 #      fail-fast: true
       matrix:
         version:
-          - { php: 5.6, composer: 1, phpunit: 5 }
-          - { php: 7.1, composer: 1, phpunit: 7 }
-          - { php: 7.2, composer: 2.x, phpunit: 8 }
-          - { php: 7.3, composer: 2.x, phpunit: 8 }
-          - { php: 7.4, composer: 2.x, phpunit: 8 }
+          - { php: 7.4, composer: 2.x, phpunit: 8.5 }
+          - { php: 8.0, composer: 2.x, phpunit: 8.5 }
+          - { php: 8.1, composer: 2.x, phpunit: 8.5 }
+          - { php: 8.2, composer: 2.x, phpunit: 8.5 }
         hstore_ext:
           - no
           - yes
@@ -23,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: PHP ${{ matrix.version.php }} install 
+      - name: PHP ${{ matrix.version.php }} install
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.version.php }}

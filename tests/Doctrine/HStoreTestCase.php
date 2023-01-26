@@ -2,23 +2,27 @@
 
 namespace Intaro\HStore\Tests\Doctrine;
 
-class HStoreTestCase extends \PHPUnit_Framework_TestCase
+use Cache\Adapter\PHPArray\ArrayCachePool;
+use Doctrine\ORM\ORMSetup;
+use PHPUnit\Framework\TestCase;
+
+class HStoreTestCase extends TestCase
 {
     public $entityManager = null;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         if (!class_exists('\Doctrine\ORM\Configuration')) {
             $this->markTestSkipped('Doctrine is not available');
         }
 
         $config = new \Doctrine\ORM\Configuration();
-        $config->setMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache());
-        $config->setQueryCacheImpl(new \Doctrine\Common\Cache\ArrayCache());
+        $config->setMetadataCache(new ArrayCachePool());
+        $config->setQueryCache(new ArrayCachePool());
         $config->setProxyDir(__DIR__ . '/Proxies');
         $config->setProxyNamespace('Intaro\HStore\Tests\Proxies');
         $config->setAutoGenerateProxyClasses(true);
-        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver(__DIR__ . '/Entities'));
+        $config->setMetadataDriverImpl(ORMSetup::createDefaultAnnotationDriver([__DIR__ . '/Entities']));
         $config->addEntityNamespace('E', 'Intaro\HStore\Tests\Doctrine\Entities');
 
         $config->setCustomStringFunctions(array(
