@@ -1,15 +1,17 @@
 <?php
 
 namespace Intaro\HStore\Tests\Doctrine\Entities;
+use Doctrine\ORM\Mapping as ORM;
+
 
 /**
- * @Entity
+ * @ORM\Entity
  */
 class Order
 {
-    /** @Id @Column(type="string") @GeneratedValue */
+    /** @ORM\Id @ORM\Column(type="string") @ORM\GeneratedValue */
     public $id;
 
-    /** @Column(type="hstore") */
+    /** @ORM\Column(type="hstore") */
     public $attrs;
 }
