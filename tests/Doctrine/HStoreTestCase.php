@@ -23,7 +23,9 @@ class HStoreTestCase extends TestCase
         $config->setProxyNamespace('Intaro\HStore\Tests\Proxies');
         $config->setAutoGenerateProxyClasses(true);
         $config->setMetadataDriverImpl(ORMSetup::createDefaultAnnotationDriver([__DIR__ . '/Entities']));
-        $config->addEntityNamespace('E', 'Intaro\HStore\Tests\Doctrine\Entities');
+        $config->setEntityNamespaces([
+            'E' => 'Intaro\HStore\Tests\Doctrine\Entities'
+        ]);
 
         $config->setCustomStringFunctions(array(
             'akeys'            => 'Intaro\HStore\Doctrine\Query\AKeysFunction',
