@@ -19,7 +19,7 @@ class HStoreType extends Type
         return self::HSTORE;
     }
 
-    public function convertToPHPValue($value, AbstractPlatform $platform)
+    public function convertToPHPValue($value, AbstractPlatform $platform): mixed
     {
         if (null === $value) {
             return null;
@@ -41,7 +41,7 @@ class HStoreType extends Type
         }
     }
 
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
     {
         if (null === $value) {
             return null;
@@ -63,7 +63,7 @@ class HStoreType extends Type
         return Coder::encode($value);
     }
 
-    public function getName()
+    public function getName(): string
     {
         return self::HSTORE;
     }
